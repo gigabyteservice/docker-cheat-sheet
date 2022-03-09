@@ -261,6 +261,8 @@ https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabi
 
 To enter a running container, attach a new shell process to a running container called foo, use: `docker exec -it foo /bin/bash`.
 
+To enter a running container with Root user `docker exec -it --user root <container id> /bin/bash`
+
 ## Images
 
 Images are just [templates for docker containers](https://docs.docker.com/engine/understanding-docker/#how-does-a-docker-image-work).
