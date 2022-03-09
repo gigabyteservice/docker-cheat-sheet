@@ -1,3 +1,5 @@
+#!/bin/bash
+# All docker container IP and Ports
 function dip() {
         _print_container_info() {
             local container_id
@@ -5,7 +7,7 @@ function dip() {
             local container_ip
             local container_name
             container_id="${1}"
-        
+
             container_ports=( $(docker port "$container_id" | grep -o "0.0.0.0:.*" | cut -f2 -d:) )
             container_name="$(docker inspect --format "{{ .Name }}" "$container_id" | sed 's/\///')"
             container_ip="$(docker inspect --format "{{range .NetworkSettings.Networks}}{{.IPAddress}}  {{end}}" "$container_id")"
@@ -24,3 +26,4 @@ function dip() {
             _print_container_info  "$container_id"
         fi
 }
+dip
