@@ -1,17 +1,26 @@
-#!/bin/bash
-# All docker container IP and Ports
 function dip() {
-        if [ -z $1 ]; then
-                docker ps -a --format "{{.ID}}" | while read -r line ; do
-                        PORTS=$(docker port "$line" | grep -o "0.0.0.0:.*" | cut -f2 -d:)
-                        if [ -z "${PORTS}" ]; then
-                            echo $line $(docker inspect --format "{{ .Name }} {{range .NetworkSettings.Networks}} {{.IPAddress}}{{end}}" $line | sed 's/\///'):" No open ports"
-                        else
-                            echo $line $(docker inspect --format "{{ .Name }} {{range .NetworkSettings.Networks}} {{.IPAddress}}{{end}}" $line | sed 's/\///'):${PORTS}
-                        fi
-                done
+        _print_container_info() {
+            local container_id
+            local container_ports
+            local container_ip
+            local container_name
+            container_id="${1}"
+        
+            container_ports=( $(docker port "$container_id" | grep -o "0.0.0.0:.*" | cut -f2 -d:) )
+            container_name="$(docker inspect --format "{{ .Name }}" "$container_id" | sed 's/\///')"
+            container_ip="$(docker inspect --format "{{range .NetworkSettings.Networks}}{{.IPAddress}}  {{end}}" "$container_id")"
+            printf "%-13s %-40s %-20s %-80s\n" "$container_id" "$container_name" "$container_ip" "${container_ports[*]}"
+        }
+
+        local container_id
+        container_id="$1"
+        printf "%-13s %-40s %-20s %-80s\n" 'Container Id' 'Container Name' 'Container IP' 'Container Ports'
+        if [ -z "$container_id" ]; then
+            local container_id
+            docker ps -a --format "{{.ID}}" | while read -r container_id ; do
+                _print_container_info  "$container_id"
+            done
         else
-                echo $(docker inspect --format "{{.ID }} {{ .Name }} {{ .NetworkSettings.Networks.bridge.IPAddress }}" $1 | sed 's/\///'):$(docker port "$1" | grep -o "0.0.0.0:.*" | cut -f2 -d:)
+            _print_container_info  "$container_id"
         fi
 }
-dip
